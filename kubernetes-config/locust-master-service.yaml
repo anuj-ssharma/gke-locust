@@ -1,4 +1,4 @@
-# Copyright 2015 Google Inc. All rights reserved.
+# TAKEN: https://github.com/GoogleCloudPlatform/distributed-load-testing-using-kubernetes/blob/master/kubernetes-config/locust-master-service.yaml
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,12 +16,15 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: locust-master
+  name: locust-test
   labels:
-    app: locust-master
+    name: locust-test
+    role: master
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
 spec:
   ports:
-    - port: 8089
+    - port: 80
       targetPort: loc-master-web
       protocol: TCP
       name: loc-master-web
@@ -34,5 +37,16 @@ spec:
       protocol: TCP
       name: loc-master-p2
   selector:
-    app: locust-master
-  type: LoadBalancer
+    name: locust-test
+    role: master
+  type: NodePort
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: locust-test-ingress
+spec:
+  backend:
+    serviceName: locust-test
+    servicePort: 80 # Should match the port used by the Service
