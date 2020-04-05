@@ -1,4 +1,4 @@
-# Copyright 2015 Google Inc. All rights reserved.
+# TAKEN: https://github.com/GoogleCloudPlatform/distributed-load-testing-using-kubernetes/blob/master/kubernetes-config/locust-worker-controller.yaml
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,29 +12,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: "extensions/v1beta1"
-kind: "Deployment"
+
+kind: ReplicationController
+apiVersion: v1
 metadata:
-  name: locust-worker
+  name: locust-worker-test
   labels:
-    name: locust-worker
+    name: locust-test
+    role: worker
 spec:
-  replicas: 5
+  replicas: 3
   selector:
-    matchLabels:
-      app: locust-worker
+    name: locust-test
+    role: worker
   template:
     metadata:
       labels:
-        app: locust-worker
+        name: locust-test
+        role: worker
     spec:
       containers:
-        - name: locust-worker
-          image: gcr.io/gke-locust/locust-tasks:latest
+        - name: locust-test
+          image: <image_name>:latest
           env:
             - name: LOCUST_MODE
               value: worker
             - name: PERF_MASTER
-              value: locust-master
+              value: locust-test
+            - name: LOCUST_FILE
+              value: some_file.py
+            - name: LOCUSTS
+              value: MyLocust
             - name: TARGET_HOST
-              value: https://jsonplaceholder.typicode.com
+              value: http://localhost
