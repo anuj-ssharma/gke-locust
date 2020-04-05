@@ -1,4 +1,4 @@
-# Copyright 2015 Google Inc. All rights reserved.
+# TAKEN: https://github.com/GoogleCloudPlatform/distributed-load-testing-using-kubernetes/blob/master/kubernetes-config/locust-master-controller.yaml
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,37 +13,62 @@
 # limitations under the License.
 
 
-apiVersion: "extensions/v1beta1"
-kind: "Deployment"
+kind: ReplicationController
+apiVersion: v1
 metadata:
-  name: locust-master
+  name: locust-master-test
   labels:
-    name: locust-master
+    name: locust-test
+    role: master
 spec:
   replicas: 1
   selector:
-    matchLabels:
-      app: locust-master
+    name: locust-test
+    role: master
   template:
     metadata:
+      name: locust-test
       labels:
-        app: locust-master
+        name: locust-test
+        role: master
     spec:
       containers:
-        - name: locust-master
-          image: gcr.io/gke-locust/locust-tasks:latest
+        - name: locust-test
+          image: <image_name>:latest
           env:
             - name: LOCUST_MODE
               value: master
+            - name: STEP_MODE
+              value: "false"
+            - name: LOCUST_FILE
+              value: some_file.py
+            - name: LOCUSTS
+              value: HomePageLocust
+            - name: USERNAME
+              value: test
+            - name: PASSWORD
+              value: test
             - name: TARGET_HOST
-              value: https://jsonplaceholder.typicode.com
+              value: http://localhost
           ports:
-            - name: loc-master-web
-              containerPort: 8089
+            - containerPort: 8080
               protocol: TCP
-            - name: loc-master-p1
-              containerPort: 5557
+              name: loc-master-web
+            - containerPort: 5557
               protocol: TCP
-            - name: loc-master-p2
-              containerPort: 5558
+              name: loc-master-p1
+            - containerPort: 5558
               protocol: TCP
+              name: loc-master-p2
+          livenessProbe:
+            httpGet:
+              path: /healthcheck
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /healthcheck
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 3
