@@ -16,13 +16,19 @@
 
 
 LOCUST="/usr/local/bin/locust"
-LOCUS_OPTS="-locust-file=locust-tasks/tasks.py --host=$TARGET_HOST"
+LOCUS_OPTS="--locustfile=locust-tasks/$LOCUST_FILE $LOCUSTS --host=$TARGET_HOST --web-auth $USERNAME:$PASSWORD"
 LOCUST_MODE=${LOCUST_MODE:-standalone}
 
 if [[ "$LOCUST_MODE" = "master" ]]; then
-    LOCUS_OPTS="$LOCUS_OPTS --master"
+    export LOCUST_MASTER_PORT=8089
+    echo "$LOCUST_MASTER_PORT"
+    LOCUS_OPTS="$LOCUS_OPTS --master --web-port 8080"
+
+    if [[ "$STEP_MODE" = true ]]; then
+      LOCUS_OPTS="$LOCUS_OPTS --step-load"
+    fi
 elif [[ "$LOCUST_MODE" = "worker" ]]; then
-    LOCUS_OPTS="$LOCUS_OPTS --slave --master-host=$PERF_MASTER"
+    LOCUS_OPTS="$LOCUS_OPTS --slave --master-host=$PERF_MASTER --master-port=5557"
 fi
 
 echo "$LOCUST $LOCUS_OPTS"
