@@ -11,7 +11,7 @@ greenlet==0.4.15
 idna==2.9
 influxdb==5.2.3
 itsdangerous==1.1.0
-Jinja2==2.11.1
+Jinja2==2.11.3
 git+http://github.com/anuj-ssharma/locust.git@httpbasicauth#egg=locustio
 locust-influx==0.2.4
 MarkupSafe==1.1.1
